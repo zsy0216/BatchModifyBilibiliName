@@ -17,7 +17,7 @@ public class BatchModifyFileName {
 
     public static void main(String[] args) {
         // 视频的下载路径
-        String downloadPath = "E:\\Videos\\Bilibili videos\\75233634";
+        String downloadPath = "E:\\Videos\\Bilibili videos\\78494646";
         // 视频av号：就是路径的最后一级目录
         String avNum = null;
         Pattern pattern = Pattern.compile("\\d+");
@@ -40,7 +40,7 @@ public class BatchModifyFileName {
             //原始文件：E:\Videos\Captures\75233634\1\75233634_1_0.flv
             File originFile = flvList.get(i);
             if (originFile.renameTo(destFile)) {
-                System.out.println("success!" + destFile.getName());
+                System.out.println(i +"- success!  " + destFile.getName());
             }
         }
     }
