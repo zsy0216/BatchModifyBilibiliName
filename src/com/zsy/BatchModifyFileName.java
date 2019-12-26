@@ -1,8 +1,13 @@
 package com.zsy;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
+
 import java.io.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -17,7 +22,7 @@ public class BatchModifyFileName {
 
     public static void main(String[] args) {
         // 视频的下载路径
-        String downloadPath = "E:\\Videos\\Bilibili videos\\78494646";
+        String downloadPath = "E:\\Videos\\Bilibili videos\\71874024";
         // 视频av号：就是路径的最后一级目录
         String avNum = null;
         Pattern pattern = Pattern.compile("\\d+");
@@ -31,8 +36,6 @@ public class BatchModifyFileName {
         List<String> partNameList = getPartNameList(infoList);
 
         for (int i = 0; i < flvList.size(); i++) {
-            // System.out.println(flvList.get(i));
-            // System.out.println(getDestFile(partNameList.get(i), flvList.get(i), avNum));
             String partName = partNameList.get(i);
             File flvFile = flvList.get(i);
             // 目标文件:E:\Videos\75233634\1_1、这阶段该如何学习.flv
@@ -81,7 +84,7 @@ public class BatchModifyFileName {
      * @param infoFile
      * @return
      */
-    public static String getPartName(File infoFile) {
+   /* public static String getPartName(File infoFile) {
         BufferedReader br = null;
         String partName = null;
         try {
@@ -105,6 +108,32 @@ public class BatchModifyFileName {
             }
         }
         return partName;
+    }*/
+
+    /**
+     * 读取 info 文件，存入Map，根据key获取视频文件名
+     *
+     * @param infoFile
+     * @return
+     */
+    public static String partNameByMap(File infoFile){
+        String info = "";
+        String partName = null;
+        try {
+            FileInputStream in = new FileInputStream(infoFile);
+            int size = in.available();
+            byte[] buffer = new byte[size];
+            in.read(buffer);
+            in.close();
+            info = new String(buffer);
+            JSONObject objects = JSON.parseObject(info);
+            Map<String, Object> partNameMap = new HashMap<>(objects);
+            partName = partNameMap.get("PartName").toString();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return partName;
     }
 
     /**
@@ -117,7 +146,9 @@ public class BatchModifyFileName {
         List<String> partNameList = new ArrayList<>();
         for (int i = 0; i < infoList.size(); i++) {
             // 调用获取视频名的方法
-            String partName = getPartName(infoList.get(i));
+            // String partName = getPartName(infoList.get(i));
+            //
+            String partName = partNameByMap(infoList.get(i));
             partNameList.add(partName);
         }
         return partNameList;
