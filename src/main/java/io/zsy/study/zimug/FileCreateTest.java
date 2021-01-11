@@ -1,4 +1,4 @@
-package io.zsy.study;
+package io.zsy.study.zimug;
 
 import org.junit.jupiter.api.Test;
 
@@ -12,7 +12,7 @@ import java.nio.file.StandardOpenOption;
 /**
  * @author: zsy
  * @date: 2021/1/3 16:19
- * java io 学习
+ * java io 学习 - 创建并读取文件的 5 种方法
  */
 public class FileCreateTest {
     /**
