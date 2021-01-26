@@ -41,3 +41,26 @@ src/main/java/io/zsy/study/zimug/CopyCutFileTest.java
 - 文件拷贝：将文件从一个文件夹复制到另一个文件夹;(copy)
 - 文件剪切：将文件从一个文件夹移动到另一个文件夹;(move + resolve)
 - 文件重命名：将文件改名，也可以理解为剪切为文件夹下另一个文件;(renameTo)(move)
+
+# 删除文件夹或文件的 7 种方法
+src/main/java/io/zsy/study/zimug/DeleteFileTest.java
+
+文件或文件夹的代表形式：
+  - NIO 使用 Path 
+  - 传统 IO 使用 File
+
+1. 删除空文件夹(不含子文件夹或子文件)
+
+| 删除空文件夹   | 成功返回值 | 是否能判别文件夹不存在导致失败 | 是否能判别文件夹不为空导致失败 | 备注                 |
+| -------------------------- | ---------- | ------------------------------ | ------------------------------ | -------------------- |
+| File.delete()              | true       | 否（返回false）                | 否（返回false）                | 传统IO               |
+| File.deleteOnExit()        | void       | 否，但不存在就不会执行删除     | 否（返回void）                 | 传统IO，避免使用，坑 |
+| Files.delete(Path)         | void       | NoSuchFileException            | DirectoryNotEmptyException     | NIO，推荐            |
+| Files.deleteIfExsits(Path) | true       | false                          | DirectoryNotEmptyException     | NIO                  |
+
+2. 删除带子文件的目录
+包含对满足条件的文件目录删除（大于多少 M，或者以 .log 结尾）
+   
+- Files.walkFileTree(path, SimpleFileVisitor<Path>()): 遍历文件及目录
+- Files.walk
+- 递归 listFiles: 传统 IO 递归删除
