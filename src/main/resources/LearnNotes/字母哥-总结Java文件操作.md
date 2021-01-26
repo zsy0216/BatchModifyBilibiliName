@@ -8,7 +8,7 @@ src/main/java/io/zsy/study/zimug/FileCreateTest.java
 - 使用File.createNewFile() 创建文件, FileWriter写入文件
 - 使用 FileOutputStream 管道流创建文件, 使用 BufferWriter 写入文件
 
-# 读取文件数据的6种方法
+# 读取文件数据的 6 种方法
 src/main/java/io/zsy/study/zimug/ReadFileTest.java
 
 - Scanner(Java1.5) String, Int 类型等按分隔符读数据;
@@ -34,3 +34,10 @@ src/main/java/io/zsy/study/zimug/CreateDirTest.java
     - 如果父文件夹不存在，就创建他
     - 如果文件夹已经存在，不会重复创建，没有异常抛出
     - 如果因为磁盘 IO 出现异常，抛出IOException. 
+
+# 文件拷贝及剪切的 5 种方法及优缺点
+src/main/java/io/zsy/study/zimug/CopyCutFileTest.java
+
+- 文件拷贝：将文件从一个文件夹复制到另一个文件夹;(copy)
+- 文件剪切：将文件从一个文件夹移动到另一个文件夹;(move + resolve)
+- 文件重命名：将文件改名，也可以理解为剪切为文件夹下另一个文件;(renameTo)(move)
