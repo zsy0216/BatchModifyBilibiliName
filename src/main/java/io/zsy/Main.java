@@ -17,8 +17,7 @@ public class Main {
     /**
      * 视频目录
      */
-    // final static Path PATH = Paths.get("E:\\Videos\\Bilibli Videos\\test");
-    final static Path PATH = Paths.get(System.getProperty("user.dir"));
+    final static Path PATH = Paths.get("E:\\Videos\\Bilibli Videos\\83133496");
     // 视频名
     private static String videoName;
 
