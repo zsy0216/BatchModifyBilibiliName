@@ -7,6 +7,8 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * @author: zsy
@@ -17,7 +19,7 @@ public class Main {
     /**
      * 视频目录
      */
-    final static Path PATH = Paths.get("E:\\Videos\\Bilibli Videos\\83133496");
+    final static Path PATH = Paths.get("E:\\Videos\\Bilibli Videos\\967612226");
     // 视频名
     private static String videoName;
 
@@ -68,7 +70,7 @@ public class Main {
             }
         });
         // 给视频文件夹重命名
-        Files.move(PATH, Paths.get(PATH.getParent().toString() + "\\" + videoName));
+        Files.move(PATH, Paths.get(PATH.getParent().toString() + "\\" + handleVideoName()));
         System.out.println("批量重命名完成......");
     }
 
@@ -81,7 +83,8 @@ public class Main {
      */
     private static void modifyFileName(String newName, Path file) throws IOException {
         System.out.println("新文件名: " + newName + "");
-        Files.move(file, PATH.resolve(newName));
+        // TODO 此处报FileAlreadyExistsException 增加StandardCopyOption.REPLACE_EXISTING未验证
+        Files.move(file, PATH.resolve(newName), StandardCopyOption.REPLACE_EXISTING);
     }
 
     /**
@@ -110,5 +113,22 @@ public class Main {
                 videoName = strings[1];
             }
         });
+    }
+
+    /**
+     * TODO 处理视频标题中的特殊字符
+     *
+     * @return
+     */
+    private static String handleVideoName() {
+        // 转义视频标题中的反斜杠
+        if (videoName.contains("[\\s\\\\/:\\*\\?\\\"<>\\|]")) {
+            return videoName.replaceAll("\\\\", "-");
+
+            // Pattern pattern = Pattern.compile("[\\s\\\\/:\\*\\?\\\"<>\\|]");
+            // Matcher matcher = pattern.matcher(videoName);
+            // videoName = matcher.replaceAll("-");
+        }
+        return videoName;
     }
 }
