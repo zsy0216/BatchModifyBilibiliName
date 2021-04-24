@@ -13,14 +13,23 @@ import java.util.regex.Pattern;
 /**
  * @author: zsy
  * @date: 2021/1/10 13:15
+ * // TODO 修改文件名后 1.4.7.13等文件消失
  */
-@SuppressWarnings("ALL")
+// @SuppressWarnings("ALL")
 public class Main {
     /**
      * 视频目录
      */
-    final static Path PATH = Paths.get("E:\\Videos\\Bilibli Videos\\967612226");
-    // 视频名
+    final static Path PATH = Paths.get("C:\\Users\\ZSY\\Music\\4563994683");
+
+    /**
+     * 文件夹名特殊字符判断
+     */
+    final static Pattern PATTERN = Pattern.compile("[\\\\/:*?\"<>|]");
+
+    /**
+     * 视频名
+     */
     private static String videoName;
 
     public static void main(String[] args) throws IOException {
@@ -70,7 +79,7 @@ public class Main {
             }
         });
         // 给视频文件夹重命名
-        Files.move(PATH, Paths.get(PATH.getParent().toString() + "\\" + handleVideoName()));
+        Files.move(PATH, Paths.get(PATH.getParent().toString() + "\\" + videoName));
         System.out.println("批量重命名完成......");
     }
 
@@ -110,25 +119,17 @@ public class Main {
         Files.readAllLines(path, Charset.forName("GBK")).forEach(s -> {
             if (s.startsWith("InfoTip")) {
                 String[] strings = s.split("=");
-                videoName = strings[1];
+                videoName = handleVideoName(strings[1]);
             }
         });
     }
 
     /**
-     * TODO 处理视频标题中的特殊字符
+     * 处理视频标题中的特殊字符
      *
      * @return
      */
-    private static String handleVideoName() {
-        // 转义视频标题中的反斜杠
-        if (videoName.contains("[\\s\\\\/:\\*\\?\\\"<>\\|]")) {
-            return videoName.replaceAll("\\\\", "-");
-
-            // Pattern pattern = Pattern.compile("[\\s\\\\/:\\*\\?\\\"<>\\|]");
-            // Matcher matcher = pattern.matcher(videoName);
-            // videoName = matcher.replaceAll("-");
-        }
-        return videoName;
+    private static String handleVideoName(String videoName) {
+        return PATTERN.matcher(videoName).replaceAll("");
     }
 }
