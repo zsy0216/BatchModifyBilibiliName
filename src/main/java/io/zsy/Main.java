@@ -2,25 +2,27 @@ package io.zsy;
 
 import com.alibaba.fastjson.JSONObject;
 import io.zsy.bilibili.model.Info;
+import io.zsy.bilibili.model.MagicValue;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
-import java.nio.file.*;
+import java.nio.file.FileVisitResult;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
  * @author: zsy
  * @date: 2021/1/10 13:15
- * // TODO 修改文件名后 1.4.7.13等文件消失
  */
-// @SuppressWarnings("ALL")
-public class Main {
+public class Main implements MagicValue {
     /**
      * 视频目录
      */
-    final static Path PATH = Paths.get("C:\\Users\\ZSY\\Music\\4563994683");
+    final static Path PATH = Paths.get("C:\\Users\\ZSY\\Music\\93195247");
 
     /**
      * 文件夹名特殊字符判断
@@ -31,6 +33,11 @@ public class Main {
      * 视频名
      */
     private static String videoName;
+
+    /**
+     * 改名后视频存放目录
+     */
+    private static Path newPath;
 
     public static void main(String[] args) throws IOException {
         // 获取下载视频的视频名
@@ -45,25 +52,31 @@ public class Main {
 
             @Override
             public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-                System.out.println("当前所在目录: " + file.getParent());
+                System.out.println("当前所在视频目录: " + file.getParent());
                 String fileName = file.getFileName().toFile().getName();
                 // 当前文件是分p视频基本信息文件
-                if (fileName.endsWith(".info")) {
+                if (fileName.endsWith(SUFFIX_INFO)) {
                     Info videoInfo = getVideoInfo(file);
                     partNo = videoInfo.getPartNo();
                     partName = videoInfo.getPartName();
                     System.out.println("视频编号: " + partNo + ", 视频名称: " + partName);
                     Files.delete(file);
-                    System.out.println("该目录文件: " + file.getFileName() + " 已被删除");
+                    System.out.println("分p文件: " + file.getFileName() + " 已被删除");
                 }
-                // 当前文件是视频文件
-                else if (fileName.endsWith(".mp4") || fileName.endsWith(".flv")) {
+                // 当前文件是视频文件，改名，移动到一级目录
+                else if (fileName.endsWith(SUFFIX_MP4) || fileName.endsWith(SUFFIX_FLV)) {
                     String extension = fileName.split("\\.")[1];
                     String newName = partNo + "_" + partName + "." + extension;
-                    modifyFileName(newName, file);
+                    System.out.println("新视频名: " + newName + "");
+                    Files.move(file, newPath.resolve(newName));
+                }
+                // 弹幕文件，直接删除
+                else if (fileName.endsWith(SUFFIX_XML)) {
+                    Files.delete(file);
+                    System.out.println("弹幕文件: " + file.getFileName() + " 已被删除");
                 } else {
                     Files.delete(file);
-                    System.out.println("该目录文件: " + file.getFileName() + " 已被删除");
+                    System.out.println("未知文件: " + file.getFileName() + " 已被删除");
                 }
 
                 return FileVisitResult.CONTINUE;
@@ -71,37 +84,20 @@ public class Main {
 
             @Override
             public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
-                if (dir != PATH) {
-                    Files.delete(dir);
-                    System.out.println("视频所在文件夹: " + dir.getFileName() + " 已被删除");
-                }
+                Files.delete(dir);
+                System.out.println("视频所在文件夹: " + dir.getFileName() + " 已被删除");
                 return FileVisitResult.CONTINUE;
             }
         });
-        // 给视频文件夹重命名
-        Files.move(PATH, Paths.get(PATH.getParent().toString() + "\\" + videoName));
         System.out.println("批量重命名完成......");
-    }
-
-    /**
-     * 重命名视频文件并移动到一级目录
-     *
-     * @param newName
-     * @param file
-     * @throws IOException
-     */
-    private static void modifyFileName(String newName, Path file) throws IOException {
-        System.out.println("新文件名: " + newName + "");
-        // TODO 此处报FileAlreadyExistsException 增加StandardCopyOption.REPLACE_EXISTING未验证
-        Files.move(file, PATH.resolve(newName), StandardCopyOption.REPLACE_EXISTING);
     }
 
     /**
      * 读取 av.info 文件，获取 Info 对象信息
      *
-     * @param infoPath
-     * @return
-     * @throws IOException
+     * @param infoPath av.info
+     * @return Info
+     * @throws IOException e
      */
     private static Info getVideoInfo(Path infoPath) throws IOException {
         String info = new String(Files.readAllBytes(infoPath));
@@ -111,23 +107,26 @@ public class Main {
     /**
      * 获取视频名称: 非分p视频名
      *
-     * @throws IOException
+     * @throws IOException e
      */
     private static void getVideoName() throws IOException {
         Path path = Paths.get(PATH.toString(), "\\desktop.ini");
 
         Files.readAllLines(path, Charset.forName("GBK")).forEach(s -> {
-            if (s.startsWith("InfoTip")) {
+            if (s.startsWith(INFO_TIP)) {
                 String[] strings = s.split("=");
                 videoName = handleVideoName(strings[1]);
             }
         });
+        // 新建存储视频的文件夹
+        newPath = Paths.get(PATH.getParent().toString() + "\\" + videoName);
+        Files.createDirectory(newPath);
     }
 
     /**
      * 处理视频标题中的特殊字符
      *
-     * @return
+     * @return 视频标题
      */
     private static String handleVideoName(String videoName) {
         return PATTERN.matcher(videoName).replaceAll("");
