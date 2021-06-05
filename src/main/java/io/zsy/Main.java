@@ -22,7 +22,7 @@ public class Main implements MagicValue {
     /**
      * 视频目录
      */
-    final static Path PATH = Paths.get("C:\\Users\\ZSY\\Music\\93195247");
+    final static Path PATH = Paths.get("E:\\Videos\\Bilibli Videos\\42264659");
 
     /**
      * 文件夹名特殊字符判断
@@ -72,20 +72,25 @@ public class Main implements MagicValue {
                 }
                 // 弹幕文件，直接删除
                 else if (fileName.endsWith(SUFFIX_XML)) {
-                    Files.delete(file);
-                    System.out.println("弹幕文件: " + file.getFileName() + " 已被删除");
+                    if (Files.exists(file)) {
+                        Files.delete(file);
+                        System.out.println("弹幕文件: " + file.getFileName() + " 已被删除");
+                    }
                 } else {
-                    Files.delete(file);
-                    System.out.println("未知文件: " + file.getFileName() + " 已被删除");
+                    if (Files.exists(file)) {
+                        Files.delete(file);
+                        System.out.println("未知文件: " + file.getFileName() + " 已被删除");
+                    }
                 }
-
                 return FileVisitResult.CONTINUE;
             }
 
             @Override
             public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
-                Files.delete(dir);
-                System.out.println("视频所在文件夹: " + dir.getFileName() + " 已被删除");
+                if (Files.exists(dir)) {
+                    Files.delete(dir);
+                    System.out.println("视频所在文件夹: " + dir.getFileName() + " 已被删除");
+                }
                 return FileVisitResult.CONTINUE;
             }
         });
@@ -120,7 +125,9 @@ public class Main implements MagicValue {
         });
         // 新建存储视频的文件夹
         newPath = Paths.get(PATH.getParent().toString() + "\\" + videoName);
-        Files.createDirectory(newPath);
+        if (Files.notExists(newPath)) {
+            Files.createDirectory(newPath);
+        }
     }
 
     /**
