@@ -12,22 +12,23 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Pattern;
 
 /**
- * 1. 多 P 视频
- * 2. 电影
+ * 1. 影视剧
+ * 2. 纪录片
  * <p>
- * 保留封面、视频基本信息
+ * 多余文件未删除
  *
  * @author: zsy
  * @date: 2021/1/10 13:15
  */
-public class Main implements MagicValue {
+public class MainTV implements MagicValue {
     /**
      * 视频目录
      */
-    final static Path PATH = Paths.get("E:\\Videos\\Bilibli Videos\\90007319");
+    final static Path PATH = Paths.get("D:\\temp\\test");
 
     /**
      * 文件夹名特殊字符判断
@@ -49,43 +50,27 @@ public class Main implements MagicValue {
         getVideoName();
         System.out.println("本视频名为: " + videoName);
 
-        // 遍历视频目录
+        // 最外层
         Files.walkFileTree(PATH, new SimpleFileVisitor<Path>() {
-            // 读取出来的 分p号 分p视频名
-            String partNo = null;
-            String partName = null;
+            String episodeName = "";
 
+            // 遍历剧集
             @Override
             public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-                // System.out.println("当前所在视频目录: " + file.getParent());
-                String fileName = file.getFileName().toFile().getName();
-                // 当前文件是分p视频基本信息文件
-                if (fileName.endsWith(SUFFIX_INFO)) {
-                    Info videoInfo = getVideoInfo(file);
-                    partNo = videoInfo.getPartNo();
-                    partName = videoInfo.getPartName();
-                    // System.out.println("视频编号: " + partNo + ", 视频名称: " + partName);
-                    Files.delete(file);
-                    // System.out.println("分p文件: " + file.getFileName() + " 已被删除");
-                }
-                // 当前文件是视频文件，改名，移动到一级目录
-                else if (fileName.endsWith(SUFFIX_MP4) || fileName.endsWith(SUFFIX_FLV)) {
-                    String extension = fileName.split("\\.")[1];
-                    String newName = partNo + "_" + partName + "." + extension;
-                    // System.out.println("新视频名: " + newName + "");
-                    Files.move(file, newPath.resolve(newName));
-                }
-                // 弹幕文件，直接删除
-                else if (fileName.endsWith(SUFFIX_XML)) {
-                    if (Files.exists(file)) {
-                        Files.delete(file);
-                        // System.out.println("弹幕文件: " + file.getFileName() + " 已被删除");
+                System.out.println("当前文件名：" + file.getFileName().toFile().getName());
+                if (!file.getParent().equals(PATH)) {
+                    String fileName = file.getFileName().toFile().getName();
+                    if (fileName.endsWith(SUFFIX_INFO)) {
+                        Info videoInfo = getVideoInfo(file);
+                        episodeName = videoInfo.getTitle();
+                        System.out.println("剧集名：" + episodeName);
                     }
-                } else {
-                    if (Files.exists(file)) {
-                        // 这些文件是封面、视频信息等文件，暂不删除
-                        // Files.delete(file);
-                        // System.out.println("未知文件: " + file.getFileName() + " 已被删除");
+                    // 当前文件是视频文件，改名，移动到一级目录
+                    else if (fileName.endsWith(SUFFIX_MP4) || fileName.endsWith(SUFFIX_FLV)) {
+                        String extension = fileName.split("\\.")[1];
+                        String newName = episodeName + "." + extension;
+                        System.out.println("新文件名：" + newName);
+                        Files.move(file, newPath.resolve(newName));
                     }
                 }
                 return FileVisitResult.CONTINUE;
@@ -93,17 +78,11 @@ public class Main implements MagicValue {
 
             @Override
             public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
-                // 视频最外层文件夹，不删除
-                if (PATH.equals(dir)) {
-                    return FileVisitResult.CONTINUE;
-                }
-                if (Files.exists(dir)) {
-                    Files.delete(dir);
-                    // System.out.println("视频所在文件夹: " + dir.getFileName() + " 已被删除");
-                }
+                System.out.println("当前文件夹：" + dir.getFileName().toFile().getName());
                 return FileVisitResult.CONTINUE;
             }
         });
+
         System.out.println("批量重命名完成......");
     }
 
@@ -138,6 +117,27 @@ public class Main implements MagicValue {
         if (Files.notExists(newPath)) {
             Files.createDirectory(newPath);
         }
+    }
+
+    /**
+     * 获取剧集名
+     *
+     * @param episode 剧集文件夹
+     * @return 剧集名
+     * @throws IOException e
+     */
+    private static String getEpisodeName(Path episode) throws IOException {
+        // Path path = Paths.get(episode.toString(), "\\desktop.ini");
+
+        AtomicReference<String> episodeName = new AtomicReference<>();
+
+        Files.readAllLines(episode, Charset.forName("GBK")).forEach(s -> {
+            if (s.startsWith(INFO_TIP)) {
+                String[] strings = s.split("=");
+                episodeName.set(handleVideoName(strings[1]));
+            }
+        });
+        return episodeName.get();
     }
 
     /**

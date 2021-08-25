@@ -2,9 +2,6 @@ package io.zsy.bilibili.model;
 
 import lombok.Data;
 
-import java.util.Date;
-import java.util.List;
-
 /**
  * 视频基本信息
  *
@@ -20,7 +17,7 @@ public class Info {
     // private String Cid;
     // private String SeasonId;
     // private String EpisodeId;
-    // private String Title;
+    private String Title;
     // private String Uploader;
     // private String Description;
     // private String CoverURL;

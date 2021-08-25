@@ -14,6 +14,7 @@ public interface MagicValue {
     String SUFFIX_MP4 = ".mp4";
     String SUFFIX_FLV = ".flv";
     String SUFFIX_XML = ".xml";
+    String SUFFIX_INI = ".ini";
 
     /**
      * 视频标题 key
