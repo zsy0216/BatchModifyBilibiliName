@@ -27,7 +27,7 @@ public class Main implements MagicValue {
     /**
      * 视频目录
      */
-    final static Path PATH = Paths.get("E:\\Videos\\Bilibli Videos\\90007319");
+    final static Path PATH = Paths.get("E:\\Videos\\Bilibli Videos\\8867566");
 
     /**
      * 文件夹名特殊字符判断
@@ -146,6 +146,6 @@ public class Main implements MagicValue {
      * @return 视频标题
      */
     private static String handleVideoName(String videoName) {
-        return PATTERN.matcher(videoName).replaceAll("");
+        return PATTERN.matcher(videoName).replaceAll("").trim();
     }
 }

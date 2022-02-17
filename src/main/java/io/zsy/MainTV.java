@@ -28,7 +28,7 @@ public class MainTV implements MagicValue {
     /**
      * 视频目录
      */
-    final static Path PATH = Paths.get("D:\\temp\\test");
+    final static Path PATH = Paths.get("E:\\Videos\\Bilibli Videos\\8867566");
 
     /**
      * 文件夹名特殊字符判断
